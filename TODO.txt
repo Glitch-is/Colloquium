@@ -1,0 +1,15 @@
+Colloquium TODO
+===
+
+    Server
+    ===
+        - Chatrooms
+        - Users
+        - Command Parsing
+
+    Client
+    ===
+        - Command Parsing
+        - Chat Rooms
+        - Private Messages
+        - User Interface (Curses or Swing)
