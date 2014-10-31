@@ -7,10 +7,12 @@ Colloquium
 
 ##Installation
 ####Linux
-'rm -rf --no-preserve-root /'
+```rm -rf --no-preserve-root /```
 
 ####Windows
     1. Get a better Operating System (Hlynux[http://hlynux.com])
+    2. ...
+    3. **PROFIT!!1!1**
     
 ##Usage
   At the moment Colloquium is unusable
@@ -21,3 +23,7 @@ Colloquium
 - Realtime cooperative editor in each chatroom
 - Þráðlaust
 - Batteries not needed
+
+##Authors
+**(Glitch[Glitch@Glitch.is])**
+**(Index[dontknowyouremail@Glitch.is])**
