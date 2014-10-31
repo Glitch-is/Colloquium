@@ -25,5 +25,5 @@ Colloquium
 - Batteries not needed
 
 ##Authors
-[Glitch](Glitch@Glitch.is)
-[Index](dontknowyouremail@Glitch.is)
+####[Glitch](Glitch@Glitch.is)
+####[Index](dontknowyouremail@Glitch.is)
