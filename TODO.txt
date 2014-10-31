@@ -12,4 +12,5 @@ Colloquium TODO
         - Command Parsing
         - Chat Rooms
         - Private Messages
-        - User Interface (Curses or Swing)
+        - Swing Interface
+            - Debug Log
