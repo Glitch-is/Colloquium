@@ -106,8 +106,10 @@ class Chatroom {
 
 	public void sendMessage(String message, String nick){
 		for(Map.Entry<String, User> u : Users.entrySet()){
-			u.getValue().Output.add(nick + "> " + message);
-            System.out.println("[#"+Name+"] "+nick+"> ");
+			if(!u.getKey().equals(nick)){
+				u.getValue().Output.add(nick + "> " + message);
+            	System.out.println("[#"+Name+"] "+nick+"> ");
+			}
 		}
 	}
 
