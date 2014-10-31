@@ -1,7 +1,7 @@
 Colloquium
 ==========
 
-**Colloquium** is a Chat Application written in **Java** marketed towards scholars and exports for academic seminars or conferences. **Colloquium** features a realtime cooperative editor in which each member of a chatroom can modify its contents in realtime with other memebers of the chatroom efficiently and seamlessly.
+**Colloquium** is a Chat Application written in **Java** marketed towards scholars and experts for academic seminars or conferences. **Colloquium** features a realtime cooperative editor in which each member of a chatroom can modify its contents in realtime with other memebers of the chatroom efficiently and seamlessly.
 
 ![Colloquium Logo](http://www.troll.me/images/monocle-guy/you-sir-are-a-gentleman-and-a-scholar-thumb.jpg)
 
