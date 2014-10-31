@@ -16,17 +16,19 @@ public class ColloquiumServer {
 	public static void main(String[] args) {
 		int portNumber = 7331;
 		try {
+            System.out.println("Starting Colloquium Server...");
 
 			ServerSocket serverSocket = new ServerSocket(portNumber);
 
-			Map<String, Chatroom> chatrooms = new HashMap<String, Chatroom>();
 			chatrooms.put("Test", new Chatroom("Test"));
 
-			while(true){
-				User user = new User(serverSocket.accept());
-				user.start();
+            System.out.println(chatrooms);
 
-				chatrooms.get("Test").Users.put(user.Nick, user);
+            System.out.println("Server Started!");
+
+			while(true){
+				Thread user = new Thread(new User(serverSocket.accept()));
+				user.start();
 			}
 
 		} catch (IOException ex) {
@@ -36,7 +38,7 @@ public class ColloquiumServer {
 
 }
 
-class User extends Thread{
+class User implements Runnable{
 
 	public String Nick;
 	private Socket Sock;
@@ -58,18 +60,22 @@ class User extends Thread{
 
 			//Nickname
 			String nikput = fromClient.readUTF();
-			this.Nick = nikput;
+			Nick = nikput;
 
-			toClient.writeUTF("Welcome " + this.Nick);
+			toClient.writeUTF("Welcome " + Nick);
+
+            System.out.println(Nick + " Joined");
+
+            Join("Test");
 
 			while(true){
 				String input = fromClient.readUTF();
 
-				ColloquiumServer.chatrooms.get("Test").sendMessage(input);
+				ColloquiumServer.chatrooms.get("Test").sendMessage(input, Nick);
 
-				while(!this.Output.isEmpty()){
-					toClient.writeUTF(this.Output.get(0));
-					this.Output.remove(0);
+				while(!Output.isEmpty()){
+					toClient.writeUTF(Output.get(0));
+					Output.remove(0);
 				}
 
 			}
@@ -80,6 +86,12 @@ class User extends Thread{
 
 
 	}
+
+    public void Join(String chan){
+        // Check if channel exists
+        // If not... make it
+        ColloquiumServer.chatrooms.get(chan).Users.put(Nick, this);
+    }
 
 }
 
@@ -92,9 +104,10 @@ class Chatroom {
 		this.Name = name;
 	}
 
-	public void sendMessage(String message){
+	public void sendMessage(String message, String nick){
 		for(Map.Entry<String, User> u : Users.entrySet()){
-			u.getValue().Output.add(message);
+			u.getValue().Output.add(nick + "> " + message);
+            System.out.println("[#"+Name+"] "+nick+"> ");
 		}
 	}
 

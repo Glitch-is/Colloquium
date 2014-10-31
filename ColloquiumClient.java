@@ -17,7 +17,7 @@ public class ColloquiumClient {
 			DataOutputStream toServer = new DataOutputStream(connectToServer.getOutputStream());
 
 			//Reader
-			Scanner reader = new Scanner(System.in);
+            Scanner reader = new Scanner(System.in);
 
 			//MOTD
 			String motd = fromServer.readUTF();
@@ -34,17 +34,11 @@ public class ColloquiumClient {
 			String nickout = fromServer.readUTF();
 			System.out.println(nickout);
 
-			while(true){
+            ColloquiumListen listen = new ColloquiumListen(fromServer);
+            listen.start();
+            ColloquiumSend send = new ColloquiumSend(toServer);
+            send.start();
 
-				String input = reader.next();
-
-				System.out.print("Me>");
-				toServer.writeUTF(input);
-
-				String output = fromServer.readUTF();
-
-				System.out.println(output);
-			}
 
 		} catch (IOException ex) {
 			System.err.println(ex);
@@ -52,4 +46,53 @@ public class ColloquiumClient {
 
 	}
 
+}
+
+class ColloquiumListen extends Thread {
+    public DataInputStream i;
+
+    public ColloquiumListen(DataInputStream inp){
+        this.i = inp;
+    }
+
+    @Override
+    public void run(){
+        try
+        {
+            String output = "";
+            while(true)
+            {
+                output = i.readUTF();
+                System.out.println(output);
+            }
+        }
+        catch(IOException ex)
+        {
+
+        }
+    }
+}
+
+class ColloquiumSend extends Thread {
+    private DataOutputStream o;
+    public ColloquiumSend(DataOutputStream outp){
+        this.o = outp;
+    }
+
+    @Override
+    public void run(){
+        try
+        {
+            Scanner reader = new Scanner(System.in);
+            while(true)
+            {
+                String input = reader.next();
+                o.writeUTF(input);
+            }
+        }
+        catch(IOException ex)
+        {
+
+        }
+    }
 }
