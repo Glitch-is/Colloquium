@@ -15,7 +15,7 @@ Colloquium
     3. **PROFIT!!1!1**
     
 ##Usage
-  At the moment Colloquium is unusable
+  [Colloquium.glitch.is](http://colloquium.glitch.is/)
 
 ##Features
 - Multiple chatrooms
