@@ -1,0 +1,24 @@
+#container
+{
+	height: 95%;
+}
+
+.messages
+{
+	overflow: auto;
+	max-height: 93%;
+	min-height: 93%;
+}
+
+.line
+{
+	width: 100%;
+}
+
+.nicklist
+{
+	overflow: hidden;
+	height: 98%;
+	border-left: solid 1px #00FF00;	
+	padding: 5px;
+}
