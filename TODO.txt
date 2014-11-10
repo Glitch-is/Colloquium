@@ -3,14 +3,11 @@ Colloquium TODO
 
     Server
     ===
-        - Chatrooms
-        - Users
-        - Command Parsing
+        - Ping (Kicking the ghosts out)
 
     Client
     ===
-        - Command Parsing
-        - Chat Rooms
         - Private Messages
-        - Swing Interface
-            - Debug Log
+        - Syntax Highlighting
+        - Line-By-Line editor updating
+

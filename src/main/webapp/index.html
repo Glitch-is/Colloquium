@@ -17,23 +17,29 @@
 	</dl>
 	<div class="tabs-content">
 	  <div class="content active" id="main">
-		<div class="large-11 columns">
-		    <div id="messages-main" class="large-12 columns messages">
-		    </div>
-		    <div class="large-12 columns">
-			    <input type="text" class="input" />
-		    </div>
-		</div>
-		<div class="large-1 columns">
-			<div class="nicklist" id="nicklist-main">
+		  <div class="large-6 columns chat no-sides">
+			<div class="large-10 columns no-sides">
+			    <div id="messages-main" class="large-12 columns messages">
+			    </div>
+			    <div class="large-12 columns no-sides">
+				    <input type="text" class="input" />
+			    </div>
 			</div>
-		</div>
+			<div class="large-2 columns">
+				<div class="nicklist" id="nicklist-main">
+				</div>
+			</div>
+		  </div>
+		  <div class="large-6 columns">
+			  <textarea class="editor" id="editor-main"></textarea>
+		  </div>
 	  </div>
 	</div>
-		
+
         </div>
 
         <script src="js/vendor/jquery.js"></script>
+        <script src="js/jquery.linkify.min.js"></script>
         <script src="js/foundation.min.js"></script>
         <script src="js/main.js"></script>
         <script>

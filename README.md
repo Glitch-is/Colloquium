@@ -15,7 +15,7 @@ Colloquium
     3. **PROFIT!!1!1**
 
 ##Usage
-####[Colloquium.glitch.is](http://colloquium.glitch.is/colloquium)
+####[Colloquium.glitch.is](http://colloquium.glitch.is)
 
 ##Features
 - Multiple chatrooms

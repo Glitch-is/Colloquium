@@ -14,7 +14,7 @@ import java.util.Map;
  * @author glitch
  */
 public class Server {
-	private String MOTD = "<b>Welcome to Colloquium</b>";
+	private String MOTD = " -- <b>Welcome to Colloquium</b>\n -- <b>Check us out on GitHub https://github.com/Glitch-is/Colloquium </b>\n -- <b>Authors: Glitch & Index</b>";
 	private static Map<String, ChatRoom> chatRoom = new HashMap<String, ChatRoom>();
 
 	/**

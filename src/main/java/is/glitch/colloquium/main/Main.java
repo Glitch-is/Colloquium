@@ -9,23 +9,29 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import org.json.*;
 
-@ServerEndpoint("/colloquium")
+@ServerEndpoint("/")
 public class Main {
 
 	private static final Server serv = new Server();
 	private static int userCount = 0;
 	private User user;
 
+
+
     @OnOpen
     public void Init(Session sesh) throws IOException{
 	user = new User("user" + ++userCount, sesh);
-	user.send("motd", serv.getMOTD());
+	user.send("motd", "", "\"" + serv.getMOTD() + "\"");
 	serv.join("main",user);
+	// Start to ping
     }
     
     @OnClose
     public void Quit() throws IOException{
-   	serv.getRoom("main").leave(user.getNick()); 
+	for(String chan: user.getChatrooms())	
+	{
+		serv.getRoom(chan).leave(user.getNick());
+	}
     }
     
     @OnMessage
@@ -39,14 +45,13 @@ public class Main {
 		    case "nick":
 			    String old = user.getNick();
 			    String n = obj.getString("message");
-			    user.setNick(obj.getString("message"));
 			    boolean found = false;
 			    for(String chan : user.getChatrooms())
 			    {
 				    ChatRoom room = serv.getRoom(chan);
 				    if(room.containsUser(n))
 				    {
-					user.send("server", "Nick <span style='color: gray'>" + n + "</span> is already in use");
+					user.send("server", "","\"Nick <span style='color: gray'>" + n + "</span> is already in use\"");
 					found = true;
 					break;
 				    }
@@ -64,14 +69,24 @@ public class Main {
 					room.putPriv(n, priv);
 					room.updateNicklist();
 				    }
+				    user.setNick(obj.getString("message"));
 			    }
 		    break;
+		    case "editor":
+			    serv.getRoom(obj.getString("chatroom")).setEditor(obj.getJSONArray("message"));
+			    break;
 		    case "join":
 			    String chanName = obj.getString("message");
 			    serv.join(chanName, user);
 			    break;
+		    case "action":
+			    serv.getRoom(obj.getString("chatroom")).sendAll("action", "\"" + user.getNick() + " " + obj.getString("message") + "\"");
+			    break;
 		    case "leave":
 			    serv.getRoom(obj.getString("message")).leave(user.getNick());
+			    break;
+		    case "pong":
+			    // make sure user doesnt get kicked out
 			    break;
 	    }
     }

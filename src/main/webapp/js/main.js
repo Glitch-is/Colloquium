@@ -1,14 +1,14 @@
-var wsUri = getRootUri() + "/colloquium/colloquium";
+var wsUri = getRootUri();
 
 function getRootUri() {
-    return "ws://colloquium.glitch.is:8080";
-    // return "ws://localhost:8080";
+    return "ws://colloquium.glitch.is";
+    //return "ws://localhost:8080";
 }
 
 var chan = "main";
 
 function bindUi(){
-	$(window).on("click focus", function() {
+	$(".chat").on("click focus", function() {
 		setTimeout(function(){$(".input").focus()},1);
 	});
 
@@ -20,16 +20,24 @@ function bindUi(){
 				command(mes);
 			else
 			{
-				doSend("message", chan, mes);
+				doSend("message", chan,  "\"" + mes + "\"");
 			}
 			$(".input").val("");
 		}
+	});
+
+	$("body").on("input", ".editor", function(e){
+		doSend("editor", chan, "[\""+ $(this).val().split("\n").join("\" , \"") + "\"]");
 	});
 
 	$("body").on("click", ".chan", function(e)
 	{
 		chan = $(this).text();
 		setTimeout(function(){$(".input").focus()},1);
+	});
+
+	$(window).on("resize", function(){
+		fixHeight();
 	});
 }
 
@@ -59,12 +67,16 @@ function command(com)
 		case "nick":
 			doSend("nick", "", com.split(" ")[1]);
 		break;
+		case "me":
+			doSend("action", chan, com.split(" ").slice(1).join(" "));
+		break;
 		case "join":
 			var cName = com.split(" ")[1];
 			cName = (cName[0] === "#" ? cName.slice(1) : cName);
 			doSend("join", "", cName);
 			$(".tabs").append($("<dd><a class='chan' href='#"+cName+"'>"+cName+"</a></dd>"));
-			$(".tabs-content").append($('<div class="content" id="'+cName+'"> <div class="large-11 columns"> <div id="messages-'+cName+'" class="large-12 columns messages"> </div> <div class="large-12 columns"> <input type="text" class="input" /> </div> </div> <div class="large-1 columns"> <div class="nicklist" id="nicklist-'+cName+'"> </div> </div> </div>'));
+			$(".tabs-content").append($('<div class="content" id="'+cName+'"> <div class="large-6 columns chat"> <div class="large-10 columns no-sides"> <div id="messages-'+cName+'" class="large-12 columns messages no-sides"> </div> <div class="large-12 columns no-sides"> <input type="text" class="input" /> </div> </div> <div class="large-2 columns"> <div class="nicklist" id="nicklist-'+cName+'"> </div> </div> </div> <div class="large-6 columns"> <textarea class="editor" id="editor-'+cName+'"></textarea> </div> </div>'));
+			fixHeight();
 		break;
 		case "leave":
 			doSend("leave", "", com.split(" ")[1]);
@@ -110,36 +122,53 @@ function onOpen(evt) {
 }
 
 function onMessage(evt) {
-	console.log(evt.data);
+	console.log("IN: " + evt.data);
 	var o = JSON.parse(evt.data);
 	if(o.chatroom === "")
 		o.chatroom = chan;
-	if(o.head === "nicklist")
+	switch(o.head)
 	{
-		$("#nicklist-" + o.chatroom).html("");
-		for(nick in o.message)
-		{
-			var line = $("<div class='line'>");
-			line.append(privilege(o.message[nick][1]) + o.message[nick][0]);
-			$("#nicklist-" + o.chatroom).append(line);
-		}
+		case "nicklist":
+			$("#nicklist-" + o.chatroom).html("");
+			for(nick in o.message)
+			{
+				var line = $("<div class='line'>");
+				line.append(privilege(o.message[nick][1]) + o.message[nick][0]);
+				$("#nicklist-" + o.chatroom).append(line);
+			}
+			break;
+		case "editor":
+			var ed = $("#editor-"+o.chatroom);
+			var position = ed.prop("selectionStart");
+			ed.val(o.message.join("\n"));
+			document.getElementById("editor-" + o.chatroom).setSelectionRange(position, position);
+			break;
+		case "motd":
+			writeToChan(o.chatroom, getTime() + " " + o.message);
+			break;
+		case "server":
+			writeToChan(o.chatroom, getTime() + " " + o.message);
+			break;
+		case "action":
+			writeToChan(o.chatroom, getTime() + " <span style='color: #FF00FF'>*** " + o.message + "</span>" );
+			break;
+		case "ping":
+			doSend("pong", "", "");
+		break;
+		default:
+			writeToChan(o.chatroom, getTime() + " <span style='color: gray;'>&lt;</span> <span style='color: aqua;'><b>" + o.head + "</b></span> <span style='color: gray;'>&gt;</span> " + o.message);
+			break;
 	}
-	else if(o.head === "motd" || o.head === "server")
-	{
-		writeToChan(o.chatroom, getTime() + " " + o.message);
-	}
-	else
-	{
-		writeToChan(o.chatroom, getTime() + " <span style='color: gray;'>&lt;</span> <span style='color: aqua;'><b>" + o.head + "</b></span> <span style='color: gray;'>&gt;</span> " + o.message);
-	}
+	$(".line").linkify();
 }
 
 function onError(evt) {
-	writeToChan("main", '<span style="color: red;">ERROR:</span> ' + evt.data);
+	writeToChan("main", '<span style="color: red;">ERROR:</span> Connection to server <b><span style="color:red">[FAILED]</span></b>');
 }
 
 function doSend(head, chatroom, message) {
-	websocket.send("{\"head\":\""+head+"\", \"chatroom\":\""+chatroom+"\", \"message\":\""+message+"\"}");
+	console.log("OUT: {\"head\":\""+head+"\", \"chatroom\":\""+chatroom+"\", \"message\":"+message+"}");
+	websocket.send("{\"head\":\""+head+"\", \"chatroom\":\""+chatroom+"\", \"message\":"+message+"}");
 }
 
 function writeToChan(chan, message) {
@@ -151,7 +180,15 @@ function writeToChan(chan, message) {
 	$("#messages-"+chan).scrollTop($("#messages-"+chan)[0].scrollHeight);
 }
 
+function fixHeight()
+{
+	$('.editor').css({'height':(($(window).height())-80)+'px'});
+	$('.messages').css({'height':(($(window).height())-118)+'px'});
+	$('.nicklist').css({'height':(($(window).height())-80)+'px'});
+}
+
 $(function() {
 	bindUi();
 	init();
+	fixHeight();
 });

@@ -47,9 +47,16 @@ public class User {
 		return sesh;
 	}
 
-	public void send(String head, String message) throws IOException
+	public void send(String head, String chan, String message) throws IOException
 	{
-		sesh.getBasicRemote().sendText("{\"head\":\""+head+"\", \"chatroom\":\"\", \"message\":\""+message+"\"}");
+		String s[] = message.substring(1, message.length() - 1).split("\n");
+		if(s.length > 1)
+		{
+			for(String l : s)
+				send(head, chan, "\"" + l + "\"");
+		}
+		else
+			sesh.getBasicRemote().sendText("{\"head\":\""+head+"\", \"chatroom\":\""+chan+"\", \"message\":"+message+"}");
 	}
 
 	public void join(String name)
