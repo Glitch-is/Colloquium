@@ -3,7 +3,8 @@ Colloquium TODO
 
     Server
     ===
-        - Ping (Kicking the ghosts out)
+        - Ping (2 spooky 5 me)
+	- Private Messages
 
     Client
     ===
