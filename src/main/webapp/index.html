@@ -1,49 +1,106 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Colloquium</title>
-        <link rel="stylesheet" href="css/main.css" />
-        <link rel="stylesheet" href="css/foundation.css" />
-        <script src="js/vendor/modernizr.js"></script>
-    </head>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Colloquium</title>
+	<link rel="stylesheet" href="css/main.css" />
+	<link rel="stylesheet" href="css/foundation.css" />
+	<script src="js/vendor/modernizr.js"></script>
+</head>
 
-    <body>
+<body>
 
-        <div id="container">
+	<div id="container">
+		<!-- Tabs -->
+		<dl class="tabs" data-tab>
+			<dd class="active"><a class="chan" href="#main">main</a></dd>
+		</dl>
 
-	<dl class="tabs" data-tab>
-		  <dd class="active"><a class="chan" href="#main">main</a></dd>
-	</dl>
-	<div class="tabs-content">
-	  <div class="content active" id="main">
-		  <div class="large-6 columns chat no-sides">
-			<div class="large-10 columns no-sides">
-			    <div id="messages-main" class="large-12 columns messages">
-			    </div>
-			    <div class="large-12 columns no-sides">
-				    <input type="text" class="input" />
-			    </div>
-			</div>
-			<div class="large-2 columns">
-				<div class="nicklist" id="nicklist-main">
+		<!-- Content -->
+		<div class="tabs-content">
+			<div class="content active" id="main">
+				<div class="large-6 columns chat no-sides">
+
+					<!-- Messages -->
+					<div class="large-10 columns no-sides">
+						<div id="messages-main" class="large-12 columns messages">
+						</div>
+						<div class="large-12 columns no-sides">
+							<input type="text" class="input" />
+						</div>
+					</div>
+
+					<!-- Userlist -->
+					<div class="large-2 columns">
+						<div class="nicklist" id="nicklist-main">
+						</div>
+					</div>
+
+				</div>
+
+				<!-- Editor -->
+				<div class="large-6 columns">
+					<textarea class="editor" id="editor-main"></textarea>
 				</div>
 			</div>
-		  </div>
-		  <div class="large-6 columns">
-			  <textarea class="editor" id="editor-main"></textarea>
-		  </div>
-	  </div>
+		</div>
+
+		<!-- Help Window -->
+		<div class="help">
+			<div class="row">
+				<div class="large-12 columns">
+					<!-- Top row -->
+					<div class="row">
+						<!-- Title -->
+						<div class="large-11 columns">
+							<h2>Colloquium</h2>
+						</div>
+						<!-- Close -->
+						<div class="large-1 columns">
+							<p class="loka">&#215;</p>
+						</div>
+					</div>
+					
+					<div class="row">
+						<!-- Command list -->
+						<div class="large-6 columns">
+							<h3>Command list</h3>
+							<ul>
+								<li>/nick [SOMETHING] - Change nickname</li>
+								<li>/join [SOMETHING] - Join/Create a channel</li>
+								<li>/msg [username] [message] - Send a private</li>
+								<li>/me [SOMETHING] - Action</li>
+								<li>/leave - Leave the current channel</li>
+							</ul>
+						</div>
+
+						<!-- Guide -->
+						<div class="large-6 columns">
+							<h3>Guide</h3>
+							<ul>
+								<li>To the far left are the messages.</li>
+								<li>Top left is where the channels are.</li>
+								<li>In the middle is a list of all the users in the channel.</li>
+								<li>To the right is a collabrative editor, every channel gets its very own editor, yay.</li>
+							</ul>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+
 	</div>
+	
 
-        </div>
-
-        <script src="js/vendor/jquery.js"></script>
-        <script src="js/jquery.linkify.min.js"></script>
-        <script src="js/foundation.min.js"></script>
-        <script src="js/main.js"></script>
-        <script>
-            $(document).foundation();
-        </script>
-    </body>
+	<!-- Scripts -->
+	<script src="js/vendor/jquery.js"></script>
+	<script src="js/jquery.linkify.min.js"></script>
+	<script src="js/foundation.min.js"></script>
+	<script src="js/main.js"></script>
+	<script>
+		$(document).foundation();
+	</script>
+</body>
 </html>

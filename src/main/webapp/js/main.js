@@ -1,12 +1,16 @@
 var wsUri = getRootUri();
 
+// Websocket connection
 function getRootUri() {
     return "ws://colloquium.glitch.is";
     //return "ws://localhost:8080";
 }
 
+// Vars
 var chan = "main";
+var help = false;
 
+// Stuff
 function bindUi(){
 	$(".chat").on("click focus", function() {
 		setTimeout(function(){$(".input").focus()},1);
@@ -36,11 +40,29 @@ function bindUi(){
 		setTimeout(function(){$(".input").focus()},1);
 	});
 
+	// Close Help click
+	$("body").on("click", ".loka", function(e)
+	{
+		$('.help').css({'top':'-50%','left': '0'});
+	});
+
+	// Close help outside click
+	$("body").click(function(e){
+		if(help){
+			if (!$('.help').is(e.target) // if the target of the click isn't the container...
+		        && $('.help').has(e.target).length === 0) // ... nor a descendant of the container
+		    {
+		        $('.help').css({'top':'-50%','left': '0'});
+		    }
+		}
+	});
+
 	$(window).on("resize", function(){
 		fixHeight();
 	});
 }
 
+// Timestamp
 function getTime() {
     var now     = new Date();
     var hour    = now.getHours();
@@ -60,6 +82,7 @@ function getTime() {
     return time;
 }
 
+// Command parser
 function command(com)
 {
 	switch(com.split(" ")[0].slice(1).toLowerCase())
@@ -82,9 +105,19 @@ function command(com)
 			doSend("leave", "", com.split(" ")[1]);
 			// remove tab
 		break;
+		// Help
+		case "commands":
+		case "info":
+		case "?":
+		case "man":
+		case "help":
+			$('.help').css({'top':'30%','left': '20%'});
+			help = true;
+		break;
 	}
 }
 
+// Check your privileges m8
 function privilege( p)
 {
 	switch(p)
@@ -100,6 +133,7 @@ function privilege( p)
 	}
 }
 
+// Initialize
 function init() {
 	setTimeout(function(){$(".input").focus()},1);
 	websocket = new WebSocket(wsUri);
@@ -121,6 +155,7 @@ function init() {
 function onOpen(evt) {
 }
 
+// Reveive messages from server
 function onMessage(evt) {
 	console.log("IN: " + evt.data);
 	var o = JSON.parse(evt.data);
@@ -162,15 +197,18 @@ function onMessage(evt) {
 	$(".line").linkify();
 }
 
+// Error
 function onError(evt) {
 	writeToChan("main", '<span style="color: red;">ERROR:</span> Connection to server <b><span style="color:red">[FAILED]</span></b>');
 }
 
+// Send to server
 function doSend(head, chatroom, message) {
 	console.log("OUT: {\"head\":\""+head+"\", \"chatroom\":\""+chatroom+"\", \"message\":"+message+"}");
 	websocket.send("{\"head\":\""+head+"\", \"chatroom\":\""+chatroom+"\", \"message\":"+message+"}");
 }
 
+// Update chat
 function writeToChan(chan, message) {
 	var line = document.createElement("div");
 	line.style.wordWrap = "break-word";
@@ -180,6 +218,7 @@ function writeToChan(chan, message) {
 	$("#messages-"+chan).scrollTop($("#messages-"+chan)[0].scrollHeight);
 }
 
+// Fixes
 function fixHeight()
 {
 	$('.editor').css({'height':(($(window).height())-80)+'px'});
@@ -187,6 +226,7 @@ function fixHeight()
 	$('.nicklist').css({'height':(($(window).height())-80)+'px'});
 }
 
+// MAIN
 $(function() {
 	bindUi();
 	init();
