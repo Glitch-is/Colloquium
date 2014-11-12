@@ -5,6 +5,7 @@
  */
 package is.glitch.colloquium.main;
 
+import static is.glitch.colloquium.main.Utils.escapeHTML;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,17 @@ import java.util.Map;
 public class Server {
 	private String MOTD = " -- <b>Welcome to Colloquium</b>\n -- <b>Check us out on GitHub https://github.com/Glitch-is/Colloquium </b>\n -- <b>Authors: Glitch & Index</b>";
 	private static Map<String, ChatRoom> chatRoom = new HashMap<String, ChatRoom>();
+	private static Map<String, User> users = new HashMap<String, User>();	
+	
+	public void connect(User user)
+	{
+		users.put(user.getNick(), user);
+	}
+
+	public void disconnect(String user)
+	{
+		users.remove(user);
+	}
 
 	/**
 	 * @return the MOTD
@@ -43,6 +55,7 @@ public class Server {
 
 	public void join(String chan, User user) throws IOException
 	{
+		chan = escapeHTML(chan);
 		if(!chatRoom.containsKey(chan))
 		{
 			addRoom(chan);
@@ -51,6 +64,14 @@ public class Server {
 		getRoom(chan).join(user);
 	}
 
-	
+	public static User getUser(String name)
+	{
+		return users.get(name);
+	}
+
+	public boolean contains(String name)
+	{
+		return users.containsKey(name);
+	}
 }
 

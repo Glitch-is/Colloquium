@@ -45,18 +45,7 @@ public class Main {
 		    case "nick":
 			    String old = user.getNick();
 			    String n = obj.getString("message");
-			    boolean found = false;
-			    for(String chan : user.getChatrooms())
-			    {
-				    ChatRoom room = serv.getRoom(chan);
-				    if(room.containsUser(n))
-				    {
-					user.send("server", "","\"Nick <span style='color: gray'>" + n + "</span> is already in use\"");
-					found = true;
-					break;
-				    }
-			    }
-			    if (!found)
+			    if(serv.contains(n))
 			    {
 				    for(String chan : user.getChatrooms())
 				    {
@@ -64,12 +53,16 @@ public class Main {
 					String priv = room.checkPrivilege(old);
 					room.sendAll("server", "\"<span style='color: gray;'><b>" + old + "</b></span> is now known as <span style='color: white'><b>" + n + "</b></span>\"");
 					room.rem(old);
-					room.put(n, user);
+					room.put(n);
 					room.remPriv(old);
 					room.putPriv(n, priv);
 					room.updateNicklist();
 				    }
 				    user.setNick(obj.getString("message"));
+			    }
+			    else
+			    {
+				user.send("server", "","\"Nick <span style='color: gray'>" + n + "</span> is already in use\"");
 			    }
 		    break;
 		    case "editor":
@@ -79,11 +72,15 @@ public class Main {
 			    String chanName = obj.getString("message");
 			    serv.join(chanName, user);
 			    break;
+		    case "private":
+			    
+			    break;
 		    case "action":
 			    serv.getRoom(obj.getString("chatroom")).sendAll("action", "\"" + user.getNick() + " " + obj.getString("message") + "\"");
 			    break;
 		    case "leave":
 			    serv.getRoom(obj.getString("message")).leave(user.getNick());
+			    user.leave(obj.getString("message"));
 			    break;
 		    case "pong":
 			    // make sure user doesnt get kicked out

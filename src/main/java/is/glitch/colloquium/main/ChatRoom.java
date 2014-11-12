@@ -5,8 +5,11 @@
  */
 package is.glitch.colloquium.main;
 
+import static is.glitch.colloquium.main.Server.getUser;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 
@@ -17,7 +20,7 @@ import org.json.JSONArray;
 public class ChatRoom {
 	private String name;	
 	private Map<String, String> privilege = new HashMap<String, String>();
-	private Map<String, User> users = new HashMap<String, User>();
+	private List<String> users = new ArrayList<String>();
 	private JSONArray editor = new JSONArray();
 
 	public ChatRoom(String n)
@@ -40,9 +43,9 @@ public class ChatRoom {
 
 	public String getNickList(){
 		String ret = "[";
-		for(Map.Entry<String, User> u : users.entrySet())	
+		for(String u : users)	
 		{
-			ret += (ret.length() == 1 ? "" : ",") + "[\"" + u.getKey() +"\",\""+ checkPrivilege(u.getKey()) + "\"]";
+			ret += (ret.length() == 1 ? "" : ",") + "[\"" + u +"\",\""+ checkPrivilege(u) + "\"]";
 		}
 		return ret + "]";
 	}
@@ -52,7 +55,7 @@ public class ChatRoom {
 	}
 
 	public void join(User user) throws IOException{
-		users.put(user.getNick(), user);
+		users.add(user.getNick());
 		user.join(name);
 		updateNicklist();
 		sendAll("server", "\"<span style='color: white'><b>" + user.getNick() + "</b></span> has joined <span style='color: white'><b>#" + name + "</b></span>\"");
@@ -66,9 +69,9 @@ public class ChatRoom {
 
 	public void leave(String nick) throws IOException
 	{
-		if(users.containsKey(nick))
+		if(users.contains(nick))
 		{
-			users.get(nick).leave(name);
+			getUser(nick).leave(name);
 			users.remove(nick);
 			sendAll("server", "\"<span style='color: gray'><b>" + nick + "</b></span> has left <span style='color: gray'><b>#" + name + "</b></span>\"");
 		}
@@ -80,9 +83,9 @@ public class ChatRoom {
 		users.remove(nick);
 	}
 
-	public void put(String nick, User usr)
+	public void put(String nic)
 	{
-		users.put(nick, usr);
+		users.add(nic);
 	}
 
 	public void remPriv(String nick)
@@ -105,16 +108,17 @@ public class ChatRoom {
 		}
 		else
 		{
-			for(Map.Entry<String, User> u : users.entrySet())	
+			for(String u : users)	
 			{
-				u.getValue().getSesh().getBasicRemote().sendText("{\"head\":\""+nick+"\", \"chatroom\":\""+name+"\", \"message\":"+message+"}");
+				User user = getUser(u);
+				user.getSesh().getBasicRemote().sendText("{\"head\":\""+nick+"\", \"chatroom\":\""+name+"\", \"message\":"+message+"}");
 			}
 		}
 	}
 
 	public boolean containsUser(String nick)
 	{
-		return users.containsKey(nick);
+		return users.contains(nick);
 	}
 
 	/**

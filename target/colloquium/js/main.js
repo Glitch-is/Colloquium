@@ -70,6 +70,10 @@ function command(com)
 		case "me":
 			doSend("action", chan, com.split(" ").slice(1).join(" "));
 		break;
+		case "msg":
+			// send private message
+			doSend("private", com.split(" ")[1], com.split("").slice(1).join(" "));
+		break;
 		case "join":
 			var cName = com.split(" ")[1];
 			cName = (cName[0] === "#" ? cName.slice(1) : cName);
@@ -148,6 +152,9 @@ function onMessage(evt) {
 			break;
 		case "server":
 			writeToChan(o.chatroom, getTime() + " " + o.message);
+			break;
+		case "private":
+			// User gets sent a private message
 			break;
 		case "action":
 			writeToChan(o.chatroom, getTime() + " <span style='color: #FF00FF'>*** " + o.message + "</span>" );
