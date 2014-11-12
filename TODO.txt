@@ -4,6 +4,7 @@ Colloquium TODO
     Server
     ===
         - Ping (2 spooky 5 me)
+	- Private Messages
 
     Client
     ===

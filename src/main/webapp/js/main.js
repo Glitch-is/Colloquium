@@ -93,14 +93,55 @@ function command(com)
 		case "me":
 			doSend("action", chan, com.split(" ").slice(1).join(" "));
 		break;
+		// Join
 		case "join":
 			var cName = com.split(" ")[1];
 			cName = (cName[0] === "#" ? cName.slice(1) : cName);
 			doSend("join", "", cName);
-			$(".tabs").append($("<dd><a class='chan' href='#"+cName+"'>"+cName+"</a></dd>"));
-			$(".tabs-content").append($('<div class="content" id="'+cName+'"> <div class="large-6 columns chat"> <div class="large-10 columns no-sides"> <div id="messages-'+cName+'" class="large-12 columns messages no-sides"> </div> <div class="large-12 columns no-sides"> <input type="text" class="input" /> </div> </div> <div class="large-2 columns"> <div class="nicklist" id="nicklist-'+cName+'"> </div> </div> </div> <div class="large-6 columns"> <textarea class="editor" id="editor-'+cName+'"></textarea> </div> </div>'));
+			$(".tabs").append($("<dd><a class='chan' href='#"+cName+"'>#"+cName+"</a></dd>"));
+			$(".tabs-content").append($('<div class="content" id="'+cName+'">\
+											<div class="large-6 columns chat">\
+												<div class="large-10 columns no-sides">\
+													<div id="messages-'+cName+'" class="large-12 columns messages no-sides"></div>\
+												<div class="large-12 columns no-sides">\
+													<input type="text" class="input" />\
+												</div>\
+											</div>\
+											<div class="large-2 columns">\
+												<div class="nicklist" id="nicklist-'+cName+'"></div>\
+											</div>\
+										</div>\
+										<div class="large-6 columns">\
+											<textarea class="editor" id="editor-'+cName+'"></textarea>\
+										</div>\
+									</div>'));
 			fixHeight();
 		break;
+
+		//Message
+		case "msg":
+			//TODO
+			$(".tabs").append($("<dd><a class='chan' href='#"+username+"'>"+username+"</a></dd>"));
+			$(".tabs-content").append($('<div class="content" id="'+username+'">\
+											<div class="large-6 columns chat">\
+												<div class="large-10 columns no-sides">\
+													<div id="messages-'+username+'" class="large-12 columns messages no-sides"></div>\
+												<div class="large-12 columns no-sides">\
+													<input type="text" class="input" />\
+												</div>\
+											</div>\
+											<div class="large-2 columns">\
+												<div class="nicklist" id="nicklist-'+username+'"></div>\
+											</div>\
+										</div>\
+										<div class="large-6 columns">\
+											<textarea class="editor" id="editor-'+username+'"></textarea>\
+										</div>\
+									</div>'));
+			fixHeight();
+		break;
+
+		// Leave
 		case "leave":
 			doSend("leave", "", com.split(" ")[1]);
 			// remove tab
