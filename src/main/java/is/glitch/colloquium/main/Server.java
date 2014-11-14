@@ -24,8 +24,13 @@ public class Server {
 		users.put(user.getNick(), user);
 	}
 
-	public void disconnect(String user)
+	public void disconnect(String user) throws IOException
 	{
+		for(String c : users.get(user).getChatrooms())
+		{
+			System.out.println(user + " leaving " + c);
+			chatRoom.get(c).leave(user);
+		}
 		users.remove(user);
 	}
 

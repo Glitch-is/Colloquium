@@ -130,9 +130,17 @@ public class ChatRoom {
 
 	/**
 	 * @param editor the editor to set
+	 * @param sender
 	 */
-	public void setEditor(JSONArray editor) throws IOException {
+	public void setEditor(JSONArray editor, String sender) throws IOException {
 		this.editor = editor;
-		sendAll("editor", editor.toString());
+		for(String u : users)	
+		{
+			if(u == null ? sender != null : !u.equals(sender))
+			{
+				User user = getUser(u);
+				user.getSesh().getBasicRemote().sendText("{\"head\":\"editor\", \"chatroom\":\""+name+"\", \"message\":"+this.editor.toString()+"}");
+			}
+		}
 	}
 }

@@ -2,12 +2,14 @@ var wsUri = getRootUri();
 
 // Websocket connection
 function getRootUri() {
-    return "ws://colloquium.glitch.is";
-    //return "ws://localhost:8080";
+    //return "ws://colloquium.glitch.is";
+    return "ws://localhost:8080";
 }
 
 // Vars
-var chan = "main";
+var colors = ["aqua", "aquamarine", "blue", "blueviolet", "brown", "chartreuse", "chocolate", "cornflowerblue", "bisque", "crimson", "darkcyan", "darkgoldenrod", "darkgreen", "darkmagenta", "darkred", "darkorchid", "darksalmon", "darkseagreen", "darkslategray", "deeppink", "gold", "white", "greenyellow", "green", "hotpink", "indigo", "khaki", "lightblue", "orangered", "red", "saddlebrown"];
+var colorNicks = {};
+var chan = "#main";
 var help = false;
 
 // Stuff
@@ -24,14 +26,23 @@ function bindUi(){
 				command(mes);
 			else
 			{
-				doSend("message", chan,  "\"" + mes + "\"");
+				if(chan[0] === "#")
+				{
+					//Channel message
+					doSend("message", chan.slice(1),  "\"" + mes + "\"");
+				}
+				else
+				{
+					//Private Message
+					doSend("private", chan,  "\"" + mes + "\"");
+				}
 			}
 			$(".input").val("");
 		}
 	});
 
 	$("body").on("input", ".editor", function(e){
-		doSend("editor", chan, "[\""+ $(this).val().split("\n").join("\" , \"") + "\"]");
+		doSend("editor", (chan[0] === "#") ? chan.slice(1) : chan, "[\""+ $(this).val().split("\n").join("\" , \"") + "\"]");
 	});
 
 	$("body").on("click", ".chan", function(e)
@@ -121,25 +132,7 @@ function command(com)
 
 		//Message
 		case "msg":
-            doSend("private", com.split(" ")[1], com.split(" ").slice(1).join(" "));
-			$(".tabs").append($("<dd><a class='chan' href='#"+username+"'>"+username+"</a></dd>"));
-			$(".tabs-content").append($('<div class="content" id="'+username+'">\
-											<div class="large-6 columns chat">\
-												<div class="large-10 columns no-sides">\
-													<div id="messages-'+username+'" class="large-12 columns messages no-sides"></div>\
-												<div class="large-12 columns no-sides">\
-													<input type="text" class="input" />\
-												</div>\
-											</div>\
-											<div class="large-2 columns">\
-												<div class="nicklist" id="nicklist-'+username+'"></div>\
-											</div>\
-										</div>\
-										<div class="large-6 columns">\
-											<textarea class="editor" id="editor-'+username+'"></textarea>\
-										</div>\
-									</div>'));
-			fixHeight();
+		    doSend("private", com.split(" ")[1], "\"" + com.split(" ").slice(2).join(" ") + "\"");
 		break;
 
 		// Leave
@@ -177,6 +170,13 @@ function privilege( p)
 
 // Initialize
 function init() {
+	var col = localStorage.getItem("colors");
+	var nick = localStorage.getItem("nick");
+	var chans = localStorage.getItem("chans");
+	if(col !== null)
+		colorNicks = JSON.parse(col);
+	//if(nick !== null)
+		
 	setTimeout(function(){$(".input").focus()},1);
 	websocket = new WebSocket(wsUri);
 
@@ -209,8 +209,14 @@ function onMessage(evt) {
 			$("#nicklist-" + o.chatroom).html("");
 			for(nick in o.message)
 			{
+				nick = o.message[nick];
+				if(colorNicks[nick[0]] === undefined)
+				{
+					colorNicks[nick[0]] = colors[Math.floor(Math.random() * colors.length)];
+				}
+				localStorage.setItem("colors", JSON.stringify(colorNicks));
 				var line = $("<div class='line'>");
-				line.append(privilege(o.message[nick][1]) + o.message[nick][0]);
+				line.append(privilege(nick[1]) + "<span style='color:"+colorNicks[nick[0]]+";'>" + nick[0] + "</span>");
 				$("#nicklist-" + o.chatroom).append(line);
 			}
 			break;
@@ -227,16 +233,42 @@ function onMessage(evt) {
 			writeToChan(o.chatroom, getTime() + " " + o.message);
 			break;
 		case "private":
-			// User gets sent a private message
+			var username = o.chatroom;
+			var found = false;
+			$(".chan").each(function(ind){
+				if($(this).text() === username)
+					found = true;
+			});
+			if(!found)
+			{
+				$(".tabs").append($("<dd><a class='chan' href='#"+username+"'>"+username+"</a></dd>"));
+				$(".tabs-content").append($('<div class="content" id="'+username+'">\
+												<div class="large-6 columns chat">\
+													<div class="large-10 columns no-sides">\
+														<div id="messages-'+username+'" class="large-12 columns messages no-sides"></div>\
+													<div class="large-12 columns no-sides">\
+														<input type="text" class="input" />\
+													</div>\
+												</div>\
+												<div class="large-2 columns">\
+													<div class="nicklist" id="nicklist-'+username+'"></div>\
+												</div>\
+											</div>\
+											<div class="large-6 columns">\
+												<textarea class="editor" id="editor-'+username+'"></textarea>\
+											</div>\
+										</div>'));
+				fixHeight();
+			}
+			writeToChan(username, getTime() + " <span style='color: gray;'>&lt;</span> <span style='color: " + colorNicks[o.message.split(" ")[0]] + ";'><b>" + o.message.split(" ")[0] + "</b></span> <span style='color: gray;'>&gt;</span> " + o.message.split(" ").slice(1).join(" "));
 			break;
 		case "action":
 			writeToChan(o.chatroom, getTime() + " <span style='color: #FF00FF'>*** " + o.message + "</span>" );
 			break;
-		case "ping":
-			doSend("pong", "", "");
-		break;
 		default:
-			writeToChan(o.chatroom, getTime() + " <span style='color: gray;'>&lt;</span> <span style='color: aqua;'><b>" + o.head + "</b></span> <span style='color: gray;'>&gt;</span> " + o.message);
+			console.log(o.head);
+			console.log(colorNicks);
+			writeToChan(o.chatroom, getTime() + " <span style='color: gray;'>&lt;</span> <span style='color: " + colorNicks[o.head] + ";'><b>" + o.head + "</b></span> <span style='color: gray;'>&gt;</span> " + o.message);
 			break;
 	}
 	$(".line").linkify();
@@ -244,7 +276,7 @@ function onMessage(evt) {
 
 // Error
 function onError(evt) {
-	writeToChan("main", '<span style="color: red;">ERROR:</span> Connection to server <b><span style="color:red">[FAILED]</span></b>');
+	writeToChan(chan, '<span style="color: red;">ERROR:</span> Connection to server <b><span style="color:red">[FAILED]</span></b>');
 }
 
 // Send to server
@@ -255,6 +287,7 @@ function doSend(head, chatroom, message) {
 
 // Update chat
 function writeToChan(chan, message) {
+	chan = (chan[0] === "#" ? chan.slice(1) : chan);
 	var line = document.createElement("div");
 	line.style.wordWrap = "break-word";
 	line.className = "line";

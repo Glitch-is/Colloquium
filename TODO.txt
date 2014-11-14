@@ -3,12 +3,9 @@ Colloquium TODO
 
     Server
     ===
-        - Ping (2 spooky 5 me)
-	- Private Messages
+        - Private Message editing, need to add a new instance of a editor for private messages
 
     Client
     ===
-        - Private Messages
         - Syntax Highlighting
         - Line-By-Line editor updating
-

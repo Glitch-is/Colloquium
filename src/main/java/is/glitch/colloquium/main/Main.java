@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.OnClose;
+import javax.websocket.OnError;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import org.json.*;
@@ -17,21 +18,22 @@ public class Main {
 	private User user;
 
 
+    @OnError
+    public void onError(Throwable t) throws IOException {
+	    Quit();
+    }
 
     @OnOpen
     public void Init(Session sesh) throws IOException{
 	user = new User("user" + ++userCount, sesh);
 	user.send("motd", "", "\"" + serv.getMOTD() + "\"");
+	serv.connect(user);
 	serv.join("main",user);
-	// Start to ping
     }
     
     @OnClose
     public void Quit() throws IOException{
-	for(String chan: user.getChatrooms())	
-	{
-		serv.getRoom(chan).leave(user.getNick());
-	}
+	serv.disconnect(user.getNick());
     }
     
     @OnMessage
@@ -45,6 +47,8 @@ public class Main {
 		    case "nick":
 			    String old = user.getNick();
 			    String n = obj.getString("message");
+			    if(n.length() > 30)
+				    break;
 			    if(serv.contains(n))
 			    {
 				    for(String chan : user.getChatrooms())
@@ -66,14 +70,26 @@ public class Main {
 			    }
 		    break;
 		    case "editor":
-			    serv.getRoom(obj.getString("chatroom")).setEditor(obj.getJSONArray("message"));
+			    ChatRoom channel = serv.getRoom(obj.getString("chatroom"));
+			    if(channel != null)
+				    channel.setEditor(obj.getJSONArray("message"), user.getNick());
+			    else
+				    //Need to create new instances of editor for PM's
 			    break;
 		    case "join":
 			    String chanName = obj.getString("message");
 			    serv.join(chanName, user);
 			    break;
 		    case "private":
-			    
+			    if(serv.contains(obj.getString("chatroom")))
+			    {
+				    Server.getUser(obj.getString("chatroom")).send("private", user.getNick(), "\"" + user.getNick() + " " + obj.getString("message") + "\"");
+				    user.send("private", obj.getString("chatroom"), "\"" + user.getNick() + " " + obj.getString("message") + "\"");
+			    }
+			    else
+			    {
+				    user.send("server", "", "\"<span style='color: gray'>" + obj.getString("chatroom") + "</span>: No such nick/channel\"");
+			    }
 			    break;
 		    case "action":
 			    serv.getRoom(obj.getString("chatroom")).sendAll("action", "\"" + user.getNick() + " " + obj.getString("message") + "\"");
@@ -82,10 +98,9 @@ public class Main {
 			    serv.getRoom(obj.getString("message")).leave(user.getNick());
 			    user.leave(obj.getString("message"));
 			    break;
-		    case "pong":
-			    // make sure user doesnt get kicked out
-			    break;
 	    }
     }
+
+
 }
 
