@@ -12,6 +12,12 @@ var colorNicks = {};
 var chan = "#main";
 var help = false;
 var polio = false;
+var editor = CodeMirror.fromTextArea(document.getElementById("editor-main"), {
+    lineNumbers: true,
+    mode: "text/html",
+    matchBrackets: true,
+    theme: "the-matrix"
+});
 
 // Stuff
 function bindUi(){
@@ -51,8 +57,10 @@ function bindUi(){
 	});
 
 	// Editor sending, whenever input is detected
-	$("body").on("input", ".editor", function(e){
-		doSend("editor", (chan[0] === "#") ? chan.slice(1) : chan, "[\""+ $(this).val().split("\n").join("\" , \"") + "\"]");
+	$("body").on("keyup", "textarea", function(e){
+		// $(this).val().split("\n").join("\" , \"")
+		//alert(editor.getValue());
+		doSend("editor", (chan[0] === "#") ? chan.slice(1) : chan, "[\""+ editor.getValue().split("\n").join("\" , \"") + "\"]");
 	});
 
 	// When clicked on .chan class, focus on messagebox
@@ -262,6 +270,8 @@ function onMessage(evt) {
 
 		// Editor
 		case "editor":
+			editor.setValue(o.message.join("\n"));
+			/*
 			// Editor
 			var ed = $("#editor-"+o.chatroom);
 			// Get cursor position
@@ -270,6 +280,7 @@ function onMessage(evt) {
 			ed.val(o.message.join("\n"));
 			// Position the editor cursor
 			document.getElementById("editor-" + o.chatroom).setSelectionRange(position, position);
+			*/
 			break;
 
 		// Message of the day or Server messages
@@ -369,6 +380,7 @@ function fixHeight()
 }
 
 // Operation Marco-Polio Protocol MK3 Beta v0.8
+/*
 setTimeout(function() {
       doSend("marco");
       polio = false;
@@ -378,7 +390,7 @@ setTimeout(function() {
       if(!polio){
       	init();
       }
-}, 9000);
+}, 9000);*/
 
 // MAIN
 $(function() {
