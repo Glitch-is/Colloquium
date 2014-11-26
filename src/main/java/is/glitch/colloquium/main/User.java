@@ -59,18 +59,18 @@ public class User {
 			sesh.getBasicRemote().sendText("{\"head\":\""+head+"\", \"chatroom\":\""+chan+"\", \"message\":"+message+"}");
 	}
 
-	public void join(String name)
+	public synchronized void join(String name)
 	{
 		chatrooms.add(name);
 	}
 
-	public void leave(String name)
+	public synchronized void leave(String name)
 	{
 		chatrooms.remove(name);
 	}
 
 
-	public ArrayList<String> getChatrooms()
+	public synchronized ArrayList<String> getChatrooms()
 	{
 		return chatrooms;
 	}

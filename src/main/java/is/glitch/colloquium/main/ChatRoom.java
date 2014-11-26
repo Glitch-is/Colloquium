@@ -54,7 +54,7 @@ public class ChatRoom {
 		return Integer.toString(users.size());
 	}
 
-	public void join(User user) throws IOException{
+	public synchronized void join(User user) throws IOException{
 		users.add(user.getNick());
 		user.join(name);
 		updateNicklist();
@@ -67,23 +67,24 @@ public class ChatRoom {
 		sendAll("nicklist", getNickList());
 	}
 
-	public void leave(String nick) throws IOException
+	public synchronized void leave(String nick, boolean purge) throws IOException
 	{
 		if(users.contains(nick))
 		{
-			getUser(nick).leave(name);
+			if(!purge)
+				getUser(nick).leave(name);
 			users.remove(nick);
 			sendAll("server", "\"<span style='color: gray'><b>" + nick + "</b></span> has left <span style='color: gray'><b>#" + name + "</b></span>\"");
 		}
 		updateNicklist();
 	}
 
-	public void rem(String nick)
+	public synchronized void rem(String nick)
 	{
 		users.remove(nick);
 	}
 
-	public void put(String nic)
+	public synchronized void put(String nic)
 	{
 		users.add(nic);
 	}
@@ -110,13 +111,17 @@ public class ChatRoom {
 		{
 			for(String u : users)	
 			{
+				System.out.println("Raisins: " + u);
 				User user = getUser(u);
-				user.getSesh().getBasicRemote().sendText("{\"head\":\""+nick+"\", \"chatroom\":\""+name+"\", \"message\":"+message+"}");
+				if(user != null)
+				{
+					user.getSesh().getBasicRemote().sendText("{\"head\":\""+nick+"\", \"chatroom\":\""+name+"\", \"message\":"+message+"}");
+				}
 			}
 		}
 	}
 
-	public boolean containsUser(String nick)
+	public synchronized boolean containsUser(String nick)
 	{
 		return users.contains(nick);
 	}
@@ -124,7 +129,7 @@ public class ChatRoom {
 	/**
 	 * @return the editor
 	 */
-	public JSONArray getEditor() {
+	public synchronized JSONArray getEditor() {
 		return editor;
 	}
 
@@ -132,7 +137,7 @@ public class ChatRoom {
 	 * @param editor the editor to set
 	 * @param sender
 	 */
-	public void setEditor(JSONArray editor, String sender) throws IOException {
+	public synchronized void setEditor(JSONArray editor, String sender) throws IOException {
 		this.editor = editor;
 		for(String u : users)	
 		{

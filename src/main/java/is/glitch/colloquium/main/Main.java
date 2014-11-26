@@ -1,6 +1,9 @@
 package is.glitch.colloquium.main;
 
 import static is.glitch.colloquium.main.Utils.escapeHTML;
+import static is.glitch.colloquium.main.Server.setUser;
+import static is.glitch.colloquium.main.Server.remUser;
+import static is.glitch.colloquium.main.Server.listUsers;
 import java.io.IOException;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -20,7 +23,8 @@ public class Main {
 
     @OnError
     public void onError(Throwable t) throws IOException {
-	    Quit();
+	    //Quit(); // Do better Error handling
+	    t.printStackTrace();
     }
 
     @OnOpen
@@ -49,7 +53,7 @@ public class Main {
 			    String n = obj.getString("message");
 			    if(n.length() > 30)
 				    break;
-			    if(serv.contains(n))
+			    if(!serv.contains(n))
 			    {
 				    for(String chan : user.getChatrooms())
 				    {
@@ -62,7 +66,9 @@ public class Main {
 					room.putPriv(n, priv);
 					room.updateNicklist();
 				    }
+				    remUser(user.getNick());
 				    user.setNick(obj.getString("message"));
+				    setUser(user);
 			    }
 			    else
 			    {
@@ -74,7 +80,9 @@ public class Main {
 			    if(channel != null)
 				    channel.setEditor(obj.getJSONArray("message"), user.getNick());
 			    else
+			    {
 				    //Need to create new instances of editor for PM's
+			    }
 			    break;
 		    case "join":
 			    String chanName = obj.getString("message");
@@ -95,9 +103,11 @@ public class Main {
 			    serv.getRoom(obj.getString("chatroom")).sendAll("action", "\"" + user.getNick() + " " + obj.getString("message") + "\"");
 			    break;
 		    case "leave":
-			    serv.getRoom(obj.getString("message")).leave(user.getNick());
+			    serv.getRoom(obj.getString("message")).leave(user.getNick(), false);
 			    user.leave(obj.getString("message"));
 			    break;
+		    case "marco":
+			    user.send("polio", "", "");
 	    }
     }
 

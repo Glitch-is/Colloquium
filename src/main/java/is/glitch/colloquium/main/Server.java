@@ -19,19 +19,32 @@ public class Server {
 	private static Map<String, ChatRoom> chatRoom = new HashMap<String, ChatRoom>();
 	private static Map<String, User> users = new HashMap<String, User>();	
 	
-	public void connect(User user)
+	public synchronized void connect(User user)
 	{
 		users.put(user.getNick(), user);
 	}
 
-	public void disconnect(String user) throws IOException
+	public synchronized void disconnect(String user) throws IOException
 	{
-		for(String c : users.get(user).getChatrooms())
+		if(users.containsKey(user))
 		{
-			System.out.println(user + " leaving " + c);
-			chatRoom.get(c).leave(user);
+			for(String c : users.get(user).getChatrooms())
+			{
+				chatRoom.get(c).leave(user, true);
+			}
+			users.remove(user);
 		}
-		users.remove(user);
+		else
+		{
+			for(Map.Entry<String, ChatRoom> chatr : chatRoom.entrySet())
+			{
+				if(chatr.getValue().containsUser(user))
+				{
+					System.out.println(user + " leaving " + chatr.getKey());
+					chatr.getValue().leave(user, true);
+				}
+			}
+		}
 	}
 
 	/**
@@ -48,17 +61,17 @@ public class Server {
 		this.MOTD = MOTD;
 	}
 
-	public void addRoom(String name)
+	public synchronized void addRoom(String name)
 	{
 		chatRoom.put(name, new ChatRoom(name));
 	}
 
-	public ChatRoom getRoom(String name)
+	public synchronized ChatRoom getRoom(String name)
 	{
 		return chatRoom.get(name);
 	}
 
-	public void join(String chan, User user) throws IOException
+	public synchronized void join(String chan, User user) throws IOException
 	{
 		chan = escapeHTML(chan);
 		if(!chatRoom.containsKey(chan))
@@ -69,14 +82,41 @@ public class Server {
 		getRoom(chan).join(user);
 	}
 
-	public static User getUser(String name)
+	public synchronized static User getUser(String name)
 	{
 		return users.get(name);
 	}
 
-	public boolean contains(String name)
+	public synchronized boolean contains(String name)
 	{
 		return users.containsKey(name);
+	}
+
+	public synchronized static Map<String, User> getUsers()
+	{
+		return users;	
+	}
+
+	public synchronized static void setUser(User user)
+	{
+		users.put(user.getNick(), user);
+	}
+
+	public synchronized static void remUser (String nick)
+	{
+		users.remove(nick);
+	}
+
+	public synchronized static String listUsers ()
+	{
+		String ret =  "[";
+		for (Map.Entry<String, User> u : users.entrySet())
+		{
+		
+			ret += u.getKey() + ",";
+		}
+		return ret.substring(0, ret.length()-1) + "]";
+		
 	}
 }
 

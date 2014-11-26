@@ -4,6 +4,8 @@ Colloquium TODO
     Server
     ===
         - Private Message editing, need to add a new instance of a editor for private messages
+        - Fix OnError Disconnect...
+        - Nick always in use?!
 
     Client
     ===
