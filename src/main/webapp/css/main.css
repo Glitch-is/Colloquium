@@ -39,9 +39,10 @@ body
 .help
 {
 	position: absolute;
-	top: -50%;
+	top: -500%;
 	border: 2px solid rgba(0,255,0,0.3);
 	background-color: rgba(0,0,0,0.8);
+	z-index: 4;
 }
 
 .help > div > div > div > div > h2

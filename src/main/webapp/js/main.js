@@ -1,3 +1,4 @@
+// Websocket URI
 var wsUri = getRootUri();
 
 // Websocket connection
@@ -12,12 +13,9 @@ var colorNicks = {};
 var chan = "#main";
 var help = false;
 var polio = false;
-var editor = CodeMirror.fromTextArea(document.getElementById("editor-main"), {
-    lineNumbers: true,
-    mode: "text/html",
-    matchBrackets: true,
-    theme: "the-matrix"
-});
+var editors = {};
+
+addEditor("main");
 
 // Stuff
 function bindUi(){
@@ -60,20 +58,21 @@ function bindUi(){
 	$("body").on("keyup", "textarea", function(e){
 		// $(this).val().split("\n").join("\" , \"")
 		//alert(editor.getValue());
-		doSend("editor", (chan[0] === "#") ? chan.slice(1) : chan, "[\""+ editor.getValue().split("\n").join("\" , \"") + "\"]");
+		doSend("editor", (chan[0] === "#") ? chan.slice(1) : chan, "[\""+ editors[chan.slice(1)].getValue().split("\n").join("\" , \"") + "\"]");
 	});
 
 	// When clicked on .chan class, focus on messagebox
 	$("body").on("click", ".chan", function(e)
 	{
 		chan = $(this).text();
+		editors[chan.slice(1)].refresh();
 		setTimeout(function(){$(".input").focus()},1);
 	});
 
 	// Close Help click
 	$("body").on("click", ".loka", function(e)
 	{
-		$('.help').css({'top':'-50%','left': '0'});
+		$('.help').css({'top':'-500%','left': '0'});
 	});
 
 	// Close help outside click
@@ -152,6 +151,7 @@ function command(com)
 											<textarea class="editor" id="editor-'+cName+'"></textarea>\
 										</div>\
 									</div>'));
+			addEditor(cName);
 			fixHeight();
 		break;
 
@@ -270,7 +270,7 @@ function onMessage(evt) {
 
 		// Editor
 		case "editor":
-			editor.setValue(o.message.join("\n"));
+			editors[o.chatroom].setValue(o.message.join("\n"));
 			/*
 			// Editor
 			var ed = $("#editor-"+o.chatroom);
@@ -392,6 +392,19 @@ setTimeout(function() {
       	init();
       }
 }, 9000);*/
+
+// Push editor
+function addEditor(name)
+{
+	var newEditor = CodeMirror.fromTextArea(document.getElementById("editor-" + name), {
+	    lineNumbers: true,
+	    mode: "text/html",
+	    matchBrackets: true,
+	    theme: "the-matrix"
+	});
+
+	editors[name] = newEditor;
+}
 
 // MAIN
 $(function() {
