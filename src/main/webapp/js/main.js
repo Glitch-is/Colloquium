@@ -374,8 +374,8 @@ function writeToChan(chan, message) {
 // Auto-height
 function fixHeight()
 {
-	$('.editor').css({'height':(($(window).height())-80)+'px'});
-	$('.CodeMirror').css({'height':(($(window).height())-80)+'px'});
+	$('.editor').css({'height':(($(window).height())-133)+'px'});
+	$('.CodeMirror').css({'height':(($(window).height())-133)+'px'});
 	$('.messages').css({'height':(($(window).height())-118)+'px'});
 	$('.nicklist').css({'height':(($(window).height())-80)+'px'});
 }
@@ -398,7 +398,7 @@ function addEditor(name)
 {
 	var newEditor = CodeMirror.fromTextArea(document.getElementById("editor-" + name), {
 	    lineNumbers: true,
-	    mode: "text/html",
+	    mode: "text/x-python",
 	    matchBrackets: true,
 	    theme: "the-matrix"
 	});
@@ -406,9 +406,19 @@ function addEditor(name)
 	editors[name] = newEditor;
 }
 
+function populateModes(name){
+	var elem = '#mode-' + name;
+	select = $(elem);
+	for(lang in CodeMirror.modeInfo){
+		console.log(lang);
+		select.append('<option value='+CodeMirror.modeInfo[lang].mime+'>'+CodeMirror.modeInfo[lang].name+'</option>');
+	}
+}
+
 // MAIN
 $(function() {
 	bindUi();
 	init();
+	populateModes("main");
 	fixHeight();
 });
