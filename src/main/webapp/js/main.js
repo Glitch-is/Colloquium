@@ -2,8 +2,8 @@ var wsUri = getRootUri();
 
 // Websocket connection
 function getRootUri() {
-    return "ws://colloquium.glitch.is";
-    //return "ws://localhost:8080";
+    return "ws://colloquium.glitch.is"; // Main deployment
+    //return "ws://localhost:8080"; // For developing purposes
 }
 
 // Vars
@@ -202,7 +202,7 @@ function init() {
 	if(col !== null)
 		colorNicks = JSON.parse(col);
 	//if(nick !== null)
-		
+
 	setTimeout(function(){$(".input").focus()},1);
 	websocket = new WebSocket(wsUri);
 
@@ -327,7 +327,7 @@ function onMessage(evt) {
 			writeToChan(username, getTime() + " <span style='color: gray;'>&lt;</span> <span style='color: " + colorNicks[o.message.split(" ")[0]] + ";'><b>" + o.message.split(" ")[0] + "</b></span> <span style='color: gray;'>&gt;</span> " + o.message.split(" ").slice(1).join(" "));
 			break;
 
-		// /me command	
+		// /me command
 		case "action":
 			writeToChan(o.chatroom, getTime() + " <span style='color: #FF00FF'>*** " + o.message + "</span>" );
 			break;
@@ -375,6 +375,7 @@ function writeToChan(chan, message) {
 function fixHeight()
 {
 	$('.editor').css({'height':(($(window).height())-80)+'px'});
+	$('.CodeMirror').css({'height':(($(window).height())-80)+'px'});
 	$('.messages').css({'height':(($(window).height())-118)+'px'});
 	$('.nicklist').css({'height':(($(window).height())-80)+'px'});
 }

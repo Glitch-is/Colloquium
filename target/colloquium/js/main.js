@@ -2,8 +2,8 @@ var wsUri = getRootUri();
 
 // Websocket connection
 function getRootUri() {
-    //return "ws://colloquium.glitch.is";
-    return "ws://localhost:8080";
+    return "ws://colloquium.glitch.is"; // Main deployment
+    //return "ws://localhost:8080"; // For developing purposes
 }
 
 // Vars
@@ -11,19 +11,33 @@ var colors = ["aqua", "aquamarine", "blue", "blueviolet", "brown", "chartreuse",
 var colorNicks = {};
 var chan = "#main";
 var help = false;
+var polio = false;
+var editor = CodeMirror.fromTextArea(document.getElementById("editor-main"), {
+    lineNumbers: true,
+    mode: "text/html",
+    matchBrackets: true,
+    theme: "the-matrix"
+});
 
 // Stuff
 function bindUi(){
+	// When click, focus on messagebox
 	$(".chat").on("click focus", function() {
 		setTimeout(function(){$(".input").focus()},1);
 	});
 
+	// Enter button, send message
 	$("body").on("keydown", ".input", function(e){
+		// If ENTER
 		if(e.which === 13)
 		{
+			// Get message, make sure it's not a command
 			var mes = $(this).val();
 			if(mes[0] === "/")
+			{
 				command(mes);
+			}
+
 			else
 			{
 				if(chan[0] === "#")
@@ -37,14 +51,19 @@ function bindUi(){
 					doSend("private", chan,  "\"" + mes + "\"");
 				}
 			}
+			// Clear inputbox
 			$(".input").val("");
 		}
 	});
 
-	$("body").on("input", ".editor", function(e){
-		doSend("editor", (chan[0] === "#") ? chan.slice(1) : chan, "[\""+ $(this).val().split("\n").join("\" , \"") + "\"]");
+	// Editor sending, whenever input is detected
+	$("body").on("keyup", "textarea", function(e){
+		// $(this).val().split("\n").join("\" , \"")
+		//alert(editor.getValue());
+		doSend("editor", (chan[0] === "#") ? chan.slice(1) : chan, "[\""+ editor.getValue().split("\n").join("\" , \"") + "\"]");
 	});
 
+	// When clicked on .chan class, focus on messagebox
 	$("body").on("click", ".chan", function(e)
 	{
 		chan = $(this).text();
@@ -68,6 +87,7 @@ function bindUi(){
 		}
 	});
 
+	// When window resizes, fix height
 	$(window).on("resize", function(){
 		fixHeight();
 	});
@@ -93,14 +113,17 @@ function getTime() {
     return time;
 }
 
-// Command parser
+// Command parser (/[COMMAND])
 function command(com)
 {
 	switch(com.split(" ")[0].slice(1).toLowerCase())
 	{
+		// Change nickname
 		case "nick":
 			doSend("nick", "", com.split(" ")[1]);
 		break;
+
+		// Me command
 		case "me":
 			doSend("action", chan, com.split(" ").slice(1).join(" "));
 		break;
@@ -110,6 +133,8 @@ function command(com)
 			var cName = com.split(" ")[1];
 			cName = (cName[0] === "#" ? cName.slice(1) : cName);
 			doSend("join", "", cName);
+
+			// Create new tab
 			$(".tabs").append($("<dd><a class='chan' href='#"+cName+"'>#"+cName+"</a></dd>"));
 			$(".tabs-content").append($('<div class="content" id="'+cName+'">\
 											<div class="large-6 columns chat">\
@@ -140,6 +165,7 @@ function command(com)
 			doSend("leave", "", com.split(" ")[1]);
 			// remove tab
 		break;
+
 		// Help
 		case "commands":
 		case "info":
@@ -176,7 +202,7 @@ function init() {
 	if(col !== null)
 		colorNicks = JSON.parse(col);
 	//if(nick !== null)
-		
+
 	setTimeout(function(){$(".input").focus()},1);
 	websocket = new WebSocket(wsUri);
 
@@ -194,6 +220,7 @@ function init() {
 	};
 }
 
+// THIS IS NOT ACCEPTABLE
 function onOpen(evt) {
 }
 
@@ -201,44 +228,80 @@ function onOpen(evt) {
 function onMessage(evt) {
 	console.log("IN: " + evt.data);
 	var o = JSON.parse(evt.data);
+
+	/*JSON markup:
+	o.head     = Type of server response
+	o.message  = contents of response
+	o.chatroom = destination of response
+	*/
+
+	// If no chatroom in response, chatroom = current chatroom
 	if(o.chatroom === "")
 		o.chatroom = chan;
+
+	//Head
 	switch(o.head)
 	{
+		// Nickname list
 		case "nicklist":
+			// Empty nicklist
 			$("#nicklist-" + o.chatroom).html("");
+
+			// Populate nicklist
 			for(nick in o.message)
 			{
 				nick = o.message[nick];
+
+				// Apply random color
 				if(colorNicks[nick[0]] === undefined)
 				{
 					colorNicks[nick[0]] = colors[Math.floor(Math.random() * colors.length)];
 				}
+
+				// Keep name colors
 				localStorage.setItem("colors", JSON.stringify(colorNicks));
+				// Add user to line
 				var line = $("<div class='line'>");
 				line.append(privilege(nick[1]) + "<span style='color:"+colorNicks[nick[0]]+";'>" + nick[0] + "</span>");
+				// Append line to nicklist
 				$("#nicklist-" + o.chatroom).append(line);
 			}
 			break;
+
+		// Editor
 		case "editor":
+			editor.setValue(o.message.join("\n"));
+			/*
+			// Editor
 			var ed = $("#editor-"+o.chatroom);
+			// Get cursor position
 			var position = ed.prop("selectionStart");
+			// Set the editor value to the new contents of the editor
 			ed.val(o.message.join("\n"));
+			// Position the editor cursor
 			document.getElementById("editor-" + o.chatroom).setSelectionRange(position, position);
+			*/
 			break;
+
+		// Message of the day or Server messages
+		case "server":
 		case "motd":
 			writeToChan(o.chatroom, getTime() + " " + o.message);
 			break;
-		case "server":
-			writeToChan(o.chatroom, getTime() + " " + o.message);
-			break;
+
+		// Private messages
 		case "private":
+			// Chatroom = username
 			var username = o.chatroom;
+
+			// Check if there is already a private session in progress with the desired user
 			var found = false;
 			$(".chan").each(function(ind){
 				if($(this).text() === username)
 					found = true;
 			});
+
+			// If there isn't a session, create it
 			if(!found)
 			{
 				$(".tabs").append($("<dd><a class='chan' href='#"+username+"'>"+username+"</a></dd>"));
@@ -260,17 +323,28 @@ function onMessage(evt) {
 										</div>'));
 				fixHeight();
 			}
+			// Write the message
 			writeToChan(username, getTime() + " <span style='color: gray;'>&lt;</span> <span style='color: " + colorNicks[o.message.split(" ")[0]] + ";'><b>" + o.message.split(" ")[0] + "</b></span> <span style='color: gray;'>&gt;</span> " + o.message.split(" ").slice(1).join(" "));
 			break;
+
+		// /me command
 		case "action":
 			writeToChan(o.chatroom, getTime() + " <span style='color: #FF00FF'>*** " + o.message + "</span>" );
 			break;
+
+		// Marco-Polio
+		case "polio":
+			polio = true;
+			break;
+
+		// Normal message
 		default:
 			console.log(o.head);
 			console.log(colorNicks);
 			writeToChan(o.chatroom, getTime() + " <span style='color: gray;'>&lt;</span> <span style='color: " + colorNicks[o.head] + ";'><b>" + o.head + "</b></span> <span style='color: gray;'>&gt;</span> " + o.message);
 			break;
 	}
+	// Linkify URLs
 	$(".line").linkify();
 }
 
@@ -296,13 +370,28 @@ function writeToChan(chan, message) {
 	$("#messages-"+chan).scrollTop($("#messages-"+chan)[0].scrollHeight);
 }
 
-// Fixes
+// == Fixes ==
+// Auto-height
 function fixHeight()
 {
 	$('.editor').css({'height':(($(window).height())-80)+'px'});
+	$('.CodeMirror').css({'height':(($(window).height())-80)+'px'});
 	$('.messages').css({'height':(($(window).height())-118)+'px'});
 	$('.nicklist').css({'height':(($(window).height())-80)+'px'});
 }
+
+// Operation Marco-Polio Protocol MK3 Beta v0.8
+/*
+setTimeout(function() {
+      doSend("marco");
+      polio = false;
+}, 5000);
+
+setTimeout(function() {
+      if(!polio){
+      	init();
+      }
+}, 9000);*/
 
 // MAIN
 $(function() {
