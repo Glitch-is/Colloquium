@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Colloquium</title>
 	<link rel="stylesheet" href="css/foundation.css" />
-	
+
 	<!-- Code Mirror -->
 	<link rel=stylesheet href="codemirror/lib/codemirror.css">
 	<script src="codemirror/lib/codemirror.js"></script>
@@ -13,11 +13,16 @@
 	<script src="codemirror/mode/javascript/javascript.js"></script>
 	<script src="codemirror/mode/css/css.js"></script>
 	<script src="codemirror/mode/htmlmixed/htmlmixed.js"></script>
+	<script src="codemirror/mode/python/python.js"></script>
+	<script src="codemirror/mode/clike/clike.js"></script>
 	<script src="codemirror/addon/edit/matchbrackets.js"></script>
+	<script src="codemirror/keymap/vim.js"></script>
 	<link rel="stylesheet" href="codemirror/theme/the-matrix.css">
+	<script src="codemirror/addon/mode/loadmode.js"></script>
+	<script src="codemirror/mode/meta.js"></script>
 
 	<link rel="stylesheet" href="css/main.css" />
-	
+
 	<script src="js/vendor/modernizr.js"></script>
 </head>
 
@@ -53,7 +58,18 @@
 
 				<!-- Editor -->
 				<div class="large-6 columns">
-					<textarea class="editor" id="editor-main"></textarea>
+                    <div class="large-10 columns">
+                        <select class="modes" name="mode" id="mode-main">
+                            <option value="text/plain">None</option>
+                        </select>
+                    </div>
+                    <div class="large-2 columns">
+                        <input id="vim-main" class="vim" type="checkbox"><label>Vim</label>
+                    </div>
+
+                    <div class="large-12 columns">
+                        <textarea class="editor" id="editor-main"></textarea>
+                    </div>
 				</div>
 			</div>
 		</div>
@@ -73,7 +89,7 @@
 							<p class="loka">&#215;</p>
 						</div>
 					</div>
-					
+
 					<div class="row">
 						<!-- Command list -->
 						<div class="large-6 columns">
@@ -98,13 +114,13 @@
 							</ul>
 						</div>
 					</div>
-					
+
 				</div>
 			</div>
 		</div>
 
 	</div>
-	
+
 
 	<!-- Scripts -->
 	<script src="js/vendor/jquery.js"></script>

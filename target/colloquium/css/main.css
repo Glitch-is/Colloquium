@@ -3,6 +3,11 @@ body
 	overflow: hidden;
 }
 
+label
+{
+    color: #00FF00;
+}
+
 #container
 {
 	height: 100%;
@@ -27,21 +32,22 @@ body
 .nicklist
 {
 	overflow: hidden;
-	border: solid 1px rgba(0,255,0,0.3);	
+	border: solid 1px rgba(0,255,0,0.3);
 	padding: 5px;
 }
 
 .no-sides
 {
-	padding: 0 !IMPORTANT;	
+	padding: 0 !IMPORTANT;
 }
 
 .help
 {
 	position: absolute;
-	top: -50%;
+	top: -500%;
 	border: 2px solid rgba(0,255,0,0.3);
 	background-color: rgba(0,0,0,0.8);
+	z-index: 4;
 }
 
 .help > div > div > div > div > h2

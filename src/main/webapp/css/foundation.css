@@ -1609,23 +1609,23 @@ textarea[rows] {
 select {
   -webkit-appearance: none !important;
   -webkit-border-radius: 0px;
-  background-color: #fafafa;
+  background-color: #1A1A1A !IMPORTANT;
   background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeD0iMTJweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIzcHgiIHZpZXdCb3g9IjAgMCA2IDMiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDYgMyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+PHBvbHlnb24gcG9pbnRzPSI1Ljk5MiwwIDIuOTkyLDMgLTAuMDA4LDAgIi8+PC9zdmc+);
   background-position: 100% center;
   background-repeat: no-repeat;
-  border: 1px solid #cccccc;
+  border: 1px solid #00FF00 !IMPORTANT;
   padding: 0.5rem;
   font-size: 0.875rem;
   font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
-  color: rgba(0, 0, 0, 0.75);
+  color: #00FF00 !IMPORTANT;
   line-height: normal;
   border-radius: 0;
-  height: 2.3125rem; }
+  height: 2.8rem; }
   select.radius {
     border-radius: 3px; }
   select:hover {
-    background-color: #f3f3f3;
-    border-color: #999999; }
+    background-color: #1F1F1F;
+    border-color: #00FF00; }
   select:disabled {
     background-color: #dddddd;
     cursor: default; }

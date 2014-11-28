@@ -1,3 +1,4 @@
+// Websocket URI
 var wsUri = getRootUri();
 
 // Websocket connection
@@ -12,12 +13,9 @@ var colorNicks = {};
 var chan = "#main";
 var help = false;
 var polio = false;
-var editor = CodeMirror.fromTextArea(document.getElementById("editor-main"), {
-    lineNumbers: true,
-    mode: "text/html",
-    matchBrackets: true,
-    theme: "the-matrix"
-});
+var editors = {};
+
+addEditor("main");
 
 // Stuff
 function bindUi(){
@@ -60,20 +58,21 @@ function bindUi(){
 	$("body").on("keyup", "textarea", function(e){
 		// $(this).val().split("\n").join("\" , \"")
 		//alert(editor.getValue());
-		doSend("editor", (chan[0] === "#") ? chan.slice(1) : chan, "[\""+ editor.getValue().split("\n").join("\" , \"") + "\"]");
+		doSend("editor", (chan[0] === "#") ? chan.slice(1) : chan, "[\""+ editors[chan.slice(1)].getValue().split("\n").join("\" , \"") + "\"]");
 	});
 
 	// When clicked on .chan class, focus on messagebox
 	$("body").on("click", ".chan", function(e)
 	{
 		chan = $(this).text();
+		editors[chan.slice(1)].refresh();
 		setTimeout(function(){$(".input").focus()},1);
 	});
 
 	// Close Help click
 	$("body").on("click", ".loka", function(e)
 	{
-		$('.help').css({'top':'-50%','left': '0'});
+		$('.help').css({'top':'-500%','left': '0'});
 	});
 
 	// Close help outside click
@@ -85,6 +84,37 @@ function bindUi(){
 		        $('.help').css({'top':'-50%','left': '0'});
 		    }
 		}
+	});
+
+	$("body").on("change", ".modes", function(e){
+		var channel = $(this).attr('id').slice(5);
+		var mime = $(this).val();
+		var mode = $(this).find('option:selected').text().toLowerCase();
+		switch (mode)
+		{
+			case "html":
+				mode = "htmlmixed";
+				break;
+			case "c":
+			case "c++":
+			case "c#":
+			case "objective-c":
+			case "java":
+			case "scala":
+				mode = "clike";
+				break;
+		}
+		editors[channel].setOption("mode", mime);
+		if(mode !== "none")
+			CodeMirror.autoLoadMode(editors[channel], mode);
+	});
+
+	$("body").on("change", ".vim", function(e){
+		var channel = $(this).attr('id').slice(4);
+		if($(this).prop("checked"))
+			editors[channel].setOption("vimMode", true);
+		else
+			editors[channel].setOption("vimMode", false);
 	});
 
 	// When window resizes, fix height
@@ -149,9 +179,21 @@ function command(com)
 											</div>\
 										</div>\
 										<div class="large-6 columns">\
-											<textarea class="editor" id="editor-'+cName+'"></textarea>\
+											    <div class="large-10 columns">\
+												<select class="modes" name="mode" id="mode-'+cName+'">\
+												    <option value="text/plain">None</option>\
+												</select>\
+											    </div>\
+											    <div class="large-2 columns">\
+												<input id="vim-'+cName+'" class="vim" type="checkbox"><label>Vim</label>\
+											    </div>\
+											    <div class="large-12 columns">\
+												<textarea class="editor" id="editor-'+cName+'"></textarea>\
+											    </div>\
 										</div>\
 									</div>'));
+			addEditor(cName);
+			populateModes(cName);
 			fixHeight();
 		break;
 
@@ -220,7 +262,6 @@ function init() {
 	};
 }
 
-// THIS IS NOT ACCEPTABLE
 function onOpen(evt) {
 }
 
@@ -270,7 +311,7 @@ function onMessage(evt) {
 
 		// Editor
 		case "editor":
-			editor.setValue(o.message.join("\n"));
+			editors[o.chatroom].setValue(o.message.join("\n"));
 			/*
 			// Editor
 			var ed = $("#editor-"+o.chatroom);
@@ -318,9 +359,21 @@ function onMessage(evt) {
 												</div>\
 											</div>\
 											<div class="large-6 columns">\
+											    <div class="large-10 columns">\
+												<select class="modes" name="mode" id="mode-'+username+'">\
+												    <option value="text/plain">None</option>\
+												</select>\
+											    </div>\
+											    <div class="large-2 columns">\
+												<input id="vim-'+username+'" class="vim" type="checkbox"><label>Vim</label>\
+											    </div>\
+											    <div class="large-12 columns">\
 												<textarea class="editor" id="editor-'+username+'"></textarea>\
+											    </div>\
 											</div>\
 										</div>'));
+				addEditor(username);
+				populateModes(username);
 				fixHeight();
 			}
 			// Write the message
@@ -339,8 +392,6 @@ function onMessage(evt) {
 
 		// Normal message
 		default:
-			console.log(o.head);
-			console.log(colorNicks);
 			writeToChan(o.chatroom, getTime() + " <span style='color: gray;'>&lt;</span> <span style='color: " + colorNicks[o.head] + ";'><b>" + o.head + "</b></span> <span style='color: gray;'>&gt;</span> " + o.message);
 			break;
 	}
@@ -374,10 +425,10 @@ function writeToChan(chan, message) {
 // Auto-height
 function fixHeight()
 {
-	$('.editor').css({'height':(($(window).height())-80)+'px'});
-	$('.CodeMirror').css({'height':(($(window).height())-80)+'px'});
-	$('.messages').css({'height':(($(window).height())-118)+'px'});
-	$('.nicklist').css({'height':(($(window).height())-80)+'px'});
+	$('.editor').css({'height':(($(window).height())-120)+'px'});
+	$('.CodeMirror').css({'height':(($(window).height())-120)+'px'});
+	$('.messages').css({'height':(($(window).height())-98)+'px'});
+	$('.nicklist').css({'height':(($(window).height())-60)+'px'});
 }
 
 // Operation Marco-Polio Protocol MK3 Beta v0.8
@@ -393,9 +444,31 @@ setTimeout(function() {
       }
 }, 9000);*/
 
+// Push editor
+function addEditor(name)
+{
+	var newEditor = CodeMirror.fromTextArea(document.getElementById("editor-" + name), {
+	    lineNumbers: true,
+	    mode: "text/plain",
+	    matchBrackets: true,
+	    theme: "the-matrix"
+	});
+
+	editors[name] = newEditor;
+}
+
+function populateModes(name){
+	var elem = '#mode-' + name;
+	select = $(elem);
+	for(lang in CodeMirror.modeInfo){
+		select.append('<option value='+CodeMirror.modeInfo[lang].mime+'>'+CodeMirror.modeInfo[lang].name+'</option>');
+	}
+}
+
 // MAIN
 $(function() {
 	bindUi();
 	init();
+	populateModes("main");
 	fixHeight();
 });
